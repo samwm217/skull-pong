@@ -114,4 +114,98 @@
         text-shadow: -4px 0 red, 4px 0 blue;
       }
     }
-  </
+  </style>
+</head>
+<body>
+  <div class="pong-container">
+    <div class="retro-grid-red"></div>
+    <div class="retro-grid-blue"></div>
+    <div class="paddle"></div>
+    <div class="ball">💀</div>
+  </div>
+
+  <script>
+    // DOM Elements
+    const paddle = document.querySelector('.paddle');
+    const ball = document.querySelector('.ball');
+    const container = document.querySelector('.pong-container');
+
+    // Paddle Variables
+    let paddleX = 42.5;
+    const paddleWidth = 15;
+
+    // Ball Variables
+    let ballX = 50;
+    let ballY = 50;
+    let ballDX = 0.7;
+    let ballDY = 0.7;
+    const minSpeed = 0.5;
+    const speedIncrement = 0.05;
+
+    // Paddle Movement
+    container.addEventListener('mousemove', (e) => {
+      const containerWidth = container.offsetWidth;
+      const mouseX = e.clientX - container.offsetLeft;
+      paddleX = (mouseX / containerWidth) * 100;
+      paddleX = Math.max(0, Math.min(100 - paddleWidth, paddleX));
+      paddle.style.left = `${paddleX}%`;
+    });
+
+    // Add Randomness to Ball
+    function randomizeDirection() {
+      const randomFactor = (Math.random() - 0.5) * 0.2;
+      ballDX += randomFactor;
+      ballDX = Math.max(minSpeed, Math.abs(ballDX)) * Math.sign(ballDX);
+    }
+
+    // Game Loop
+    function gameLoop() {
+      const nextBallX = ballX + ballDX;
+      const nextBallY = ballY + ballDY;
+
+      if (nextBallX <= 0 || nextBallX >= 100) {
+        ballDX *= -1;
+      }
+
+      if (nextBallY <= 0) {
+        ballDY *= -1;
+      }
+
+      const paddleTop = 95;
+      const paddleLeft = paddleX;
+      const paddleRight = paddleX + paddleWidth;
+
+      if (
+        nextBallY >= paddleTop - 2 &&
+        ballY < paddleTop &&
+        nextBallX >= paddleLeft &&
+        nextBallX <= paddleRight
+      ) {
+        ballDY = -Math.abs(ballDY);
+        ballY = paddleTop - 8;
+        randomizeDirection();
+        ballDY -= speedIncrement;
+        ballDX += speedIncrement * Math.sign(ballDX);
+      } else {
+        ballX = nextBallX;
+        ballY = nextBallY;
+      }
+
+      if (nextBallY > 100) {
+        alert('Game Over! Try Again!');
+        ballX = 50;
+        ballY = 50;
+        ballDX = 0.7;
+        ballDY = 0.7;
+      }
+
+      ball.style.left = `${ballX}%`;
+      ball.style.top = `${ballY}%`;
+
+      requestAnimationFrame(gameLoop);
+    }
+
+    gameLoop();
+  </script>
+</body>
+</html>
