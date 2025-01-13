@@ -8,6 +8,7 @@
   <style>
     :root {
       --paddle-width: 15%; /* Paddle width as a percentage */
+      --paddle-height: 2%; /* Default paddle height */
       --ball-size: 8vw; /* Ball size scales with viewport width */
     }
 
@@ -79,7 +80,7 @@
 
     .paddle {
       width: var(--paddle-width);
-      height: 2%;
+      height: var(--paddle-height); /* Paddle height variable */
       background: white;
       position: absolute;
       bottom: 5%;
@@ -87,6 +88,13 @@
       border-radius: 5px;
       box-shadow: 0 0 5px rgba(255, 255, 255, 0.8);
       z-index: 2;
+    }
+
+    /* Media Query for Mobile */
+    @media (max-width: 768px) {
+      :root {
+        --paddle-height: 4%; /* Increase paddle height on smaller screens */
+      }
     }
 
     .ball {
