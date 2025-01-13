@@ -93,7 +93,7 @@
     /* Media Query for Mobile */
     @media (max-width: 768px) {
       :root {
-        --paddle-height: 8%; /* Increase paddle height on smaller screens */
+        --paddle-height: 6%; /* Increase paddle height on smaller screens */
       }
     }
 
@@ -149,6 +149,9 @@
     let ballDY = 0.7; // Vertical speed
     const minSpeed = 0.5; // Minimum speed
     const speedIncrement = 0.05; // Speed increase after collision
+
+    // Lives Variable
+    let lives = 10; // Player starts with 10 lives
 
     // Paddle Movement for Desktop (Mouse)
     container.addEventListener('mousemove', (e) => {
@@ -229,11 +232,22 @@
 
       // Reset Ball if It Falls Below Paddle
       if (nextBallY > 100) {
-        alert('Game Over! Try Again!');
-        ballX = 50;
-        ballY = 50;
-        ballDX = 0.7;
-        ballDY = 0.7;
+        lives--; // Decrease lives by 1
+
+        if (lives <= 0) {
+          alert('Game Over! You’ve used all your lives!');
+          ballX = 50;
+          ballY = 50;
+          ballDX = 0.7;
+          ballDY = 0.7;
+          lives = 10; // Reset lives for next play
+        } else {
+          // Reset ball position for next life
+          ballX = 50;
+          ballY = 50;
+          ballDX = 0.7;
+          ballDY = 0.7;
+        }
       }
 
       // Update Ball Position
