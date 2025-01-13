@@ -131,30 +131,56 @@
     const container = document.querySelector('.pong-container');
 
     // Paddle Variables
-    let paddleX = 42.5;
-    const paddleWidth = 15;
+    let paddleX = 42.5; // Paddle's initial X position (percentage)
+    const paddleWidth = 15; // Paddle width as percentage of container
 
     // Ball Variables
-    let ballX = 50;
-    let ballY = 50;
-    let ballDX = 0.7;
-    let ballDY = 0.7;
-    const minSpeed = 0.5;
-    const speedIncrement = 0.05;
+    let ballX = 50; // Ball's initial X position
+    let ballY = 50; // Ball's initial Y position
+    let ballDX = 0.7; // Horizontal speed
+    let ballDY = 0.7; // Vertical speed
+    const minSpeed = 0.5; // Minimum speed
+    const speedIncrement = 0.05; // Speed increase after collision
 
-    // Paddle Movement
+    // Paddle Movement for Desktop (Mouse)
     container.addEventListener('mousemove', (e) => {
       const containerWidth = container.offsetWidth;
       const mouseX = e.clientX - container.offsetLeft;
+
+      // Calculate paddle position as percentage
       paddleX = (mouseX / containerWidth) * 100;
+
+      // Constrain paddle within bounds
       paddleX = Math.max(0, Math.min(100 - paddleWidth, paddleX));
+
+      // Update paddle position
       paddle.style.left = `${paddleX}%`;
     });
 
-    // Add Randomness to Ball
+    // Paddle Movement for Mobile (Touch)
+    container.addEventListener('touchmove', (e) => {
+      const containerWidth = container.offsetWidth;
+      const touchX = e.touches[0].clientX - container.offsetLeft;
+
+      // Calculate paddle position as percentage
+      paddleX = (touchX / containerWidth) * 100;
+
+      // Constrain paddle within bounds
+      paddleX = Math.max(0, Math.min(100 - paddleWidth, paddleX));
+
+      // Update paddle position
+      paddle.style.left = `${paddleX}%`;
+
+      // Prevent default scrolling behavior
+      e.preventDefault();
+    });
+
+    // Add Randomness to Ball Movement
     function randomizeDirection() {
-      const randomFactor = (Math.random() - 0.5) * 0.2;
+      const randomFactor = (Math.random() - 0.5) * 0.2; // Random adjustment between -0.1 and 0.1
       ballDX += randomFactor;
+
+      // Ensure minimum speed is maintained
       ballDX = Math.max(minSpeed, Math.abs(ballDX)) * Math.sign(ballDX);
     }
 
@@ -163,34 +189,37 @@
       const nextBallX = ballX + ballDX;
       const nextBallY = ballY + ballDY;
 
+      // Ball Collision with Walls
       if (nextBallX <= 0 || nextBallX >= 100) {
-        ballDX *= -1;
+        ballDX *= -1; // Reverse horizontal direction
       }
 
       if (nextBallY <= 0) {
-        ballDY *= -1;
+        ballDY *= -1; // Reverse vertical direction
       }
 
-      const paddleTop = 95;
+      // Ball Collision with Paddle
+      const paddleTop = 95; // Paddle's top edge in percentage (bottom 5%)
       const paddleLeft = paddleX;
       const paddleRight = paddleX + paddleWidth;
 
       if (
-        nextBallY >= paddleTop - 2 &&
-        ballY < paddleTop &&
-        nextBallX >= paddleLeft &&
-        nextBallX <= paddleRight
+        nextBallY >= paddleTop - 2 && // Detect collision slightly above the paddle
+        ballY < paddleTop && // Ball is moving downward
+        nextBallX >= paddleLeft && // Ball is within paddle's left edge
+        nextBallX <= paddleRight // Ball is within paddle's right edge
       ) {
-        ballDY = -Math.abs(ballDY);
-        ballY = paddleTop - 8;
-        randomizeDirection();
-        ballDY -= speedIncrement;
-        ballDX += speedIncrement * Math.sign(ballDX);
+        ballDY = -Math.abs(ballDY); // Bounce upward
+        ballY = paddleTop - 8; // Snap ball to just above the paddle
+        randomizeDirection(); // Add randomness to ball direction
+        ballDY -= speedIncrement; // Increase vertical speed slightly
+        ballDX += speedIncrement * Math.sign(ballDX); // Increment horizontal speed
       } else {
         ballX = nextBallX;
         ballY = nextBallY;
       }
 
+      // Reset Ball if It Falls Below Paddle
       if (nextBallY > 100) {
         alert('Game Over! Try Again!');
         ballX = 50;
@@ -199,12 +228,15 @@
         ballDY = 0.7;
       }
 
+      // Update Ball Position
       ball.style.left = `${ballX}%`;
       ball.style.top = `${ballY}%`;
 
+      // Repeat Game Loop
       requestAnimationFrame(gameLoop);
     }
 
+    // Start Game Loop
     gameLoop();
   </script>
 </body>
