@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Skull Pong</title>
+  <style>
+    :root {
+      --paddle-width: 15%; /* Paddle width as a percentage */
+      --ball-size: 8vw; /* Ball size scales with viewport width */
+    }
+
+    body {
+      background: black;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .pong-container {
+      width: 100vw; /* Fullscreen width */
+      height: 100vh; /* Fullscreen height */
+      position: relative;
+      overflow: hidden;
+      background: black;
+    }
+
+    /* Red Dot Grid */
+    .retro-grid-red {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle, rgba(255, 0, 0, 0.5) 10%, transparent 10%) 0 0;
+      background-size: 30px 30px;
+      z-index: 1;
+      animation: flicker-red 1.5s infinite alternate;
+    }
+
+    /* Blue Dot Grid */
+    .retro-grid-blue {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle, rgba(0, 0, 255, 0.5) 10%, transparent 10%) 15px 15px;
+      background-size: 30px 30px;
+      z-index: 1;
+      animation: flicker-blue 1.5s infinite alternate;
+    }
+
+    @keyframes flicker-red {
+      0%, 100% {
+        opacity: 0.8;
+        filter: brightness(1);
+      }
+      50% {
+        opacity: 0.3;
+        filter: brightness(1.2);
+      }
+    }
+
+    @keyframes flicker-blue {
+      0%, 100% {
+        opacity: 0.3;
+        filter: brightness(1.2);
+      }
+      50% {
+        opacity: 0.8;
+        filter: brightness(1.5);
+      }
+    }
+
+    .paddle {
+      width: var(--paddle-width);
+      height: 2%;
+      background: white;
+      position: absolute;
+      bottom: 5%;
+      left: 42.5%;
+      border-radius: 5px;
+      box-shadow: 0 0 5px rgba(255, 255, 255, 0.8);
+      z-index: 2;
+    }
+
+    .ball {
+      width: var(--ball-size);
+      height: var(--ball-size);
+      background: transparent;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: calc(var(--ball-size) * 0.8);
+      animation: glitch-ball 0.5s infinite;
+      z-index: 2;
+    }
+
+    @keyframes glitch-ball {
+      0%, 100% {
+        text-shadow: 4px 0 red, -4px 0 blue;
+      }
+      50% {
+        text-shadow: -4px 0 red, 4px 0 blue;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="pong-container">
+    <div class="retro-grid-red"></div>
+    <div class="retro-grid-blue"></div>
+    <div class="paddle"></div>
+    <div class="ball">💀</div>
+  </div>
+
+  <script>
+    // DOM Elements
+    const paddle = document.querySelector('.paddle');
+    const ball = document.querySelector('.ball');
+    const container = document.querySelector('.pong-container');
+
+    // Paddle Variables
+    let paddleX = 42.5;
+    const paddleWidth = 15;
+
+    // Ball Variables
+    let ballX = 50;
+    let ballY = 50;
+    let ballDX = 0.7;
+    let ballDY = 0.7;
+    const minSpeed = 0.5;
+    const speedIncrement = 0.05;
+
+    // Paddle Movement
+    container.addEventListener('mousemove', (e) => {
+      const containerWidth = container.offsetWidth;
+      const mouseX = e.clientX - container.offsetLeft;
+      paddleX = (mouseX / containerWidth) * 100;
+      paddleX = Math.max(0, Math.min(100 - paddleWidth, paddleX));
+      paddle.style.left = `${paddleX}%`;
+    });
+
+    // Add Randomness to Ball
+    function randomizeDirection() {
+      const randomFactor = (Math.random() - 0.5) * 0.2;
+      ballDX += randomFactor;
+      ballDX = Math.max(minSpeed, Math.abs(ballDX)) * Math.sign(ballDX);
+    }
+
+    // Game Loop
+    function gameLoop() {
+      const nextBallX = ballX + ballDX;
+      const nextBallY = ballY + ballDY;
+
+      if (nextBallX <= 0 || nextBallX >= 100) {
+        ballDX *= -1;
+      }
+
+      if (nextBallY <= 0) {
+        ballDY *= -1;
+      }
+
+      const paddleTop = 95;
+      const paddleLeft = paddleX;
+      const paddleRight = paddleX + paddleWidth;
+
+      if (
+        nextBallY >= paddleTop - 2 &&
+        ballY < paddleTop &&
+        nextBallX >= paddleLeft &&
+        nextBallX <= paddleRight
+      ) {
+        ballDY = -Math.abs(ballDY);
+        ballY = paddleTop - 8;
+        randomizeDirection();
+        ballDY -= speedIncrement;
+        ballDX += speedIncrement * Math.sign(ballDX);
+      } else {
+        ballX = nextBallX;
+        ballY = nextBallY;
+      }
+
+      if (nextBallY > 100) {
+        alert('Game Over! Try Again!');
+        ballX = 50;
+        ballY = 50;
+        ballDX = 0.7;
+        ballDY = 0.7;
+      }
+
+      ball.style.left = `${ballX}%`;
+      ball.style.top = `${ballY}%`;
+
+      requestAnimationFrame(gameLoop);
+    }
+
+    gameLoop();
+  </script>
+</body>
+</html>
